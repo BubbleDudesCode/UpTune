@@ -29,7 +29,7 @@ class GlobalEventsCubit extends Cubit<GlobalEventsState> {
           newVersion: updates["newVer"],
           message:
               "A new version of UpTune is available!\n\nVersion: ${updates["newVer"]} + ${updates["newBuild"]}",
-          downloadUrl: "https://bloomee.sourceforge.io/",
+          downloadUrl: "https://uptune.sourceforge.io",
         ));
       }
     }
