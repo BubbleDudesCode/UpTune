@@ -61,6 +61,11 @@ class _SearchScreenState extends State<SearchScreen> {
     availSourceEngines = SourceEngine.values;
     _sourceEngine = availSourceEngines[0];
 
+    // Rebuild when the query text changes so the title chip reflects current text
+    _textEditingController.addListener(() {
+      if (mounted) setState(() {});
+    });
+
     setState(() {
       availableSourceEngines().then((value) {
         availSourceEngines = value;
@@ -146,7 +151,15 @@ class _SearchScreenState extends State<SearchScreen> {
                     query: _textEditingController.text,
                   );
                   if (value != null) {
-                    _textEditingController.text = value.toString();
+                    setState(() {
+                      _textEditingController.text = value.toString();
+                    });
+                    // Trigger a search with the new value so results update immediately
+                    context.read<FetchSearchResultsCubit>().search(
+                          value.toString(),
+                          sourceEngine: _sourceEngine,
+                          resultType: resultType.value,
+                        );
                   }
                 },
                 child: Container(

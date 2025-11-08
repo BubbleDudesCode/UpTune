@@ -12,6 +12,8 @@ class GlobalStrConsts {
   static const String profileSetupScreen = "ProfileSetup";
   static const String ImportMediaFromPlatforms = "ImportMediaFromPlatforms";
   static const String ChartScreen = "ChartScreen";
+  static const String friendsScreen = "Friends";
+  static const String notificationsScreen = "Notifications";
 
   static const String autoUpdateNotify = "auto_update_notify";
   static const String autoSlideCharts = "auto_slide_charts";

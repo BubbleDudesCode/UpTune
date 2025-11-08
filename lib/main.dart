@@ -40,6 +40,8 @@ import 'blocs/mediaPlayer/bloomee_player_cubit.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:Bloomee/services/discord_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:Bloomee/blocs/social/friends_cubit.dart';
+import 'package:Bloomee/blocs/social/requests_cubit.dart';
 
 void processIncomingIntent(SharedMedia sharedMedia) {
   // Check if there's text content that might be a URL
@@ -268,6 +270,8 @@ class _MyAppState extends State<MyApp> {
           create: (context) => GlobalEventsCubit(),
           lazy: false,
         ),
+        BlocProvider(create: (context) => FriendsCubit(), lazy: false),
+        BlocProvider(create: (context) => RequestsCubit(), lazy: false),
       ],
       child: BlocBuilder<BloomeePlayerCubit, BloomeePlayerState>(
         builder: (context, state) {

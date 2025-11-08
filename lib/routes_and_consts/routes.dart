@@ -14,6 +14,8 @@ import 'package:Bloomee/screens/screen/chart/chart_view.dart';
 import 'package:Bloomee/screens/screen/auth_screen.dart';
 import 'package:Bloomee/screens/screen/profile_setup_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:Bloomee/screens/screen/social/friends_page.dart';
+import 'package:Bloomee/screens/screen/social/notifications_page.dart';
 import 'dart:async';
 
 class GlobalRoutes {
@@ -95,6 +97,12 @@ class GlobalRoutes {
         },
       ),
       GoRoute(
+        name: GlobalStrConsts.notificationsScreen,
+        path: '/Notifications',
+        parentNavigatorKey: globalRouterKey,
+        builder: (context, state) => const NotificationsPage(),
+      ),
+      GoRoute(
         name: GlobalStrConsts.authScreen,
         path: '/Auth',
         parentNavigatorKey: globalRouterKey,
@@ -158,6 +166,13 @@ class GlobalRoutes {
                 name: GlobalStrConsts.offlineScreen,
                 path: '/Offline',
                 builder: (context, state) => const OfflineScreen(),
+              ),
+            ]),
+            StatefulShellBranch(routes: [
+              GoRoute(
+                name: GlobalStrConsts.friendsScreen,
+                path: '/Friends',
+                builder: (context, state) => const FriendsPage(),
               ),
             ]),
             StatefulShellBranch(routes: [

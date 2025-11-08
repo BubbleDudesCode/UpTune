@@ -32,7 +32,7 @@ class CheckUpdateView extends StatelessWidget {
                   children: [
                     const Spacer(),
                     Text(
-                      'Bloomee🌸 is up-to-date!!!',
+                      'UpTune is up-to-date!!!',
                       style: const TextStyle(
                               color: Default_Theme.accentColor2, fontSize: 20)
                           .merge(Default_Theme.secondoryTextStyleMedium),
@@ -42,7 +42,7 @@ class CheckUpdateView extends StatelessWidget {
                       child: FilledButton(
                         onPressed: () {
                           launch_Url(Uri.parse(
-                              "https://github.com/HemantKArya/BloomeeTunes/releases"));
+                              "https://github.com/BubbleDudesCode/UpTune/releases"));
                         },
                         child: SizedBox(
                           // width: 150,
@@ -87,7 +87,7 @@ class CheckUpdateView extends StatelessWidget {
                   children: [
                     const Spacer(),
                     Text(
-                      'New Version of Bloomee🌸 is now available!!',
+                      'New Version of UpTune is now available!!',
                       style: const TextStyle(
                               color: Default_Theme.accentColor2, fontSize: 20)
                           .merge(Default_Theme.tertiaryTextStyle),
@@ -109,7 +109,7 @@ class CheckUpdateView extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: FilledButton(
                         onPressed: () {
-                          launch_Url("https://bloomee.sourceforge.io/");
+                          launch_Url("https://uptune.sourceforge.io/");
                         },
                         child: SizedBox(
                           width: 150,

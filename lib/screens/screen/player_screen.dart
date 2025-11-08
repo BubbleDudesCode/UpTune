@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 import 'package:Bloomee/model/songModel.dart';
 import 'package:Bloomee/screens/screen/home_views/timer_view.dart';
@@ -867,6 +868,65 @@ class PlayerCtrlWidgets extends StatelessWidget {
                     ),
                   ],
                 ),
+                // Volume slider for desktop platforms
+                if (Platform.isLinux || Platform.isWindows)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            MingCute.volume_line,
+                            color: Default_Theme.primaryColor1.withOpacity(0.7),
+                            size: 20,
+                          ),
+                          Expanded(
+                            child: StreamBuilder<double>(
+                              stream: musicPlayer.audioPlayer.volumeStream,
+                              builder: (context, snapshot) {
+                                final volume = snapshot.data ?? 1.0;
+                                return SliderTheme(
+                                  data: SliderThemeData(
+                                    trackHeight: 3,
+                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                    activeTrackColor: Default_Theme.accentColor2,
+                                    inactiveTrackColor: Default_Theme.primaryColor2.withOpacity(0.2),
+                                    thumbColor: Default_Theme.accentColor2,
+                                    overlayColor: Default_Theme.accentColor2.withOpacity(0.3),
+                                  ),
+                                  child: Slider(
+                                    value: volume,
+                                    min: 0.0,
+                                    max: 1.0,
+                                    onChanged: (value) {
+                                      musicPlayer.audioPlayer.setVolume(value);
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          StreamBuilder<double>(
+                            stream: musicPlayer.audioPlayer.volumeStream,
+                            builder: (context, snapshot) {
+                              final volume = snapshot.data ?? 1.0;
+                              return Text(
+                                '${(volume * 100).round()}%',
+                                style: Default_Theme.secondoryTextStyle.merge(
+                                  TextStyle(
+                                    fontSize: 12,
+                                    color: Default_Theme.primaryColor1.withOpacity(0.7),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Tooltip(
                   message: "Open Original Link",
                   child: IconButton(

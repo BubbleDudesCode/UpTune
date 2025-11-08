@@ -154,6 +154,8 @@ class VerticalNavBar extends StatelessWidget {
         NavigationRailDestination(
             icon: Icon(MingCute.folder_download_fill), label: Text('Offline')),
         NavigationRailDestination(
+            icon: Icon(Icons.group), label: Text('Friends')),
+        NavigationRailDestination(
             icon: Icon(MingCute.book_5_fill), label: Text('Library')),
       ],
       selectedIndex: navigationShell.currentIndex,
@@ -204,6 +206,10 @@ class HorizontalNavBar extends StatelessWidget {
         GButton(
           icon: MingCute.folder_download_fill,
           text: "Offline",
+        ),
+        GButton(
+          icon: Icons.group,
+          text: "Friends",
         ),
         GButton(
           icon: MingCute.book_5_fill,
