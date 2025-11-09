@@ -71,5 +71,48 @@ jobs:
                   build/app/outputs/flutter-apk/bloomee_tunes_android_v${{ env.VERSION }}+${{github.run_number}}.apk
                   build/windows/x64/bloomee_tunes_windows_x64_v${{ env.VERSION }}+${{github.run_number}}.zip
 
+    build_ios:
+        name: Build iOS IPA
+        runs-on: macos-latest
+        env:
+            FLUTTER_VERSION: '3.35.4'
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Set up Flutter
+              uses: subosito/flutter-action@v2
+              with:
+                  flutter-version: ${{ env.FLUTTER_VERSION }}
+                  channel: stable
+
+            - name: Pre-cache iOS artifacts
+              run: flutter precache --ios
+
+            - name: Install Dart & Flutter dependencies
+              run: flutter pub get
+
+            - name: Install CocoaPods dependencies
+              working-directory: ios
+              run: pod install
+
+            - name: Import signing certificates and provisioning profiles
+              uses: apple-actions/import-codesign-certs@v2
+              with:
+                  p12-file-base64: ${{ secrets.IOS_CERT_P12 }}
+                  p12-password: ${{ secrets.IOS_CERT_PASSWORD }}
+                  profile-base64: ${{ secrets.IOS_PROFILE }}
+
+            - name: Build IPA
+              run: flutter build ipa --release --build-number ${{github.run_number}} --export-method app-store
+
+            - name: Upload iOS artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: ios-release
+                  path: |
+                      build/ios/ipa/*.ipa
+                      build/ios/archive/*.xcarchive
+
 
     
