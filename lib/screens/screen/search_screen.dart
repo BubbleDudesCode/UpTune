@@ -13,7 +13,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:Bloomee/blocs/internet_connectivity/cubit/connectivity_cubit.dart';
 import 'package:Bloomee/blocs/search/fetch_search_results.dart';
-import 'package:Bloomee/screens/screen/search_views/search_page.dart';
 import 'package:Bloomee/theme_data/default.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -83,45 +82,47 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  Widget sourceEngineRadioButton(SourceEngine sourceEngine) {
+  Widget resultTypeChip(ResultTypes type) {
+    final isSelected = resultType.value == type;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: SizedBox(
-        height: 27,
-        child: AnimatedContainer(
-          duration: const Duration(seconds: 1),
-          curve: Easing.standardAccelerate,
-          child: OutlinedButton(
-            onPressed: () {
-              setState(() {
-                _sourceEngine = sourceEngine;
-                context.read<FetchSearchResultsCubit>().checkAndRefreshSearch(
-                      query: _textEditingController.text.toString(),
-                      sE: sourceEngine,
-                      rT: resultType.value,
-                    );
-              });
-            },
-            style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.only(left: 10, right: 10),
-                backgroundColor: _sourceEngine == sourceEngine
-                    ? Default_Theme.accentColor2
-                    : Colors.transparent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20)),
-                side: const BorderSide(
-                    color: Default_Theme.accentColor2,
-                    style: BorderStyle.solid,
-                    width: 2)),
-            child: Text(
-              sourceEngine.value,
-              style: TextStyle(
-                      color: _sourceEngine == sourceEngine
-                          ? Default_Theme.primaryColor2
-                          : Default_Theme.accentColor2,
-                      fontSize: 13)
-                  .merge(Default_Theme.secondoryTextStyleMedium),
-            ),
+        height: 36,
+        child: OutlinedButton(
+          onPressed: () {
+            setState(() {
+              resultType.value = type;
+              context.read<FetchSearchResultsCubit>().checkAndRefreshSearch(
+                    query: _textEditingController.text.toString(),
+                    sE: _sourceEngine,
+                    rT: type,
+                  );
+            });
+          },
+          style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              backgroundColor: isSelected
+                  ? Default_Theme.accentColor2
+                  : Default_Theme.primaryColor2.withOpacity(0.03),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24)),
+              side: BorderSide(
+                  color: isSelected
+                      ? Default_Theme.accentColor2
+                      : Default_Theme.primaryColor1.withOpacity(0.1),
+                  style: BorderStyle.solid,
+                  width: 1.5)),
+          child: Text(
+            type.val,
+            style: TextStyle(
+                    color: isSelected
+                        ? Default_Theme.primaryColor2
+                        : Default_Theme.primaryColor1.withOpacity(0.7),
+                    fontSize: 13.5,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.w500)
+                .merge(Default_Theme.secondoryTextStyleMedium),
           ),
         ),
       ),
@@ -137,216 +138,158 @@ class _SearchScreenState extends State<SearchScreen> {
             FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           appBar: AppBar(
-            shadowColor: Colors.black,
+            elevation: 0,
+            shadowColor: Colors.transparent,
             surfaceTintColor: Default_Theme.themeColor,
-            title: SizedBox(
-              height: 48,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(24),
-                onTap: () async {
-                  final value = await showSearch(
-                    context: context,
-                    delegate:
-                        SearchPageDelegate(_sourceEngine, resultType.value),
-                    query: _textEditingController.text,
-                  );
-                  if (value != null) {
-                    setState(() {
-                      _textEditingController.text = value.toString();
-                    });
-                    // Trigger a search with the new value so results update immediately
-                    context.read<FetchSearchResultsCubit>().search(
-                          value.toString(),
-                          sourceEngine: _sourceEngine,
-                          resultType: resultType.value,
-                        );
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Default_Theme.primaryColor2.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Default_Theme.primaryColor1.withOpacity(0.12),
-                      width: 1.2,
-                    ),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  child: Row(
-                    children: [
-                      Icon(
-                        MingCute.search_2_fill,
-                        size: 20,
-                        color: Default_Theme.primaryColor1.withOpacity(0.45),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          _textEditingController.text.isEmpty
-                              ? "Find your next song obsession..."
-                              : _textEditingController.text,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.left,
-                          style: Default_Theme.secondoryTextStyle.merge(
-                            TextStyle(
-                              color: Default_Theme.primaryColor1
-                                  .withOpacity(0.55),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
             backgroundColor: Default_Theme.themeColor,
+            title: const Text('Search'),
           ),
           backgroundColor: Default_Theme.themeColor,
           body: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) => [
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(
-                      left: 18, right: 18, top: 5, bottom: 5),
-                  child: FutureBuilder(
-                      future: availableSourceEngines(),
-                      builder: (context, snapshot) {
-                        return snapshot.hasData || snapshot.data != null
-                            ? Wrap(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _textEditingController,
+                              decoration: InputDecoration(
+                                hintText: 'Find your next song obsession...',
+                                isDense: true,
+                                filled: true,
+                                fillColor: Default_Theme.primaryColor2.withOpacity(0.06),
+                                prefixIcon: const Icon(MingCute.search_2_fill, size: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: Default_Theme.primaryColor1.withOpacity(0.12)),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: Default_Theme.primaryColor1.withOpacity(0.12)),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(color: Default_Theme.accentColor2.withOpacity(0.7), width: 1.5),
+                                ),
+                              ),
+                              onSubmitted: (value) {
+                                context.read<FetchSearchResultsCubit>().search(
+                                  value,
+                                  sourceEngine: _sourceEngine,
+                                  resultType: resultType.value,
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton(
+                            onPressed: () {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              context.read<FetchSearchResultsCubit>().search(
+                                _textEditingController.text,
+                                sourceEngine: _sourceEngine,
+                                resultType: resultType.value,
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Default_Theme.accentColor2,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text('Search'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      FutureBuilder(
+                        future: availableSourceEngines(),
+                        builder: (context, snapshot) {
+                          return snapshot.hasData || snapshot.data != null
+                              ? Wrap(
                                 direction: Axis.horizontal,
                                 runSpacing: 8,
                                 alignment: WrapAlignment.start,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                    SizedBox(
-                                      height: 36,
-                                      width: 140,
-                                      child: Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 8),
-                                        child: ValueListenableBuilder(
-                                            valueListenable: resultType,
-                                            builder: (context, value, child) {
-                                              return DropdownButtonFormField(
-                                                key: UniqueKey(),
-                                                isExpanded: true,
-                                                isDense: false,
-                                                alignment: Alignment.center,
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                padding: const EdgeInsets.all(0),
-                                                focusColor: Colors.transparent,
-                                                dropdownColor:
-                                                    const Color.fromARGB(
-                                                        255, 15, 15, 15),
-                                                decoration: InputDecoration(
-                                                  filled: true,
-                                                  fillColor: Default_Theme
-                                                      .primaryColor2
-                                                      .withOpacity(0.07),
-                                                  contentPadding:
-                                                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                                  focusColor: Default_Theme
-                                                      .accentColor2,
-                                                  border: OutlineInputBorder(
-                                                      borderSide:
-                                                          const BorderSide(
-                                                              style: BorderStyle
-                                                                  .none),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20)),
-                                                  enabledBorder:
-                                                      OutlineInputBorder(
-                                                          borderSide:
-                                                              const BorderSide(
-                                                                  style:
-                                                                      BorderStyle
-                                                                          .none),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
-                                                  focusedBorder:
-                                                      OutlineInputBorder(
-                                                          borderSide:
-                                                              const BorderSide(
-                                                                  style:
-                                                                      BorderStyle
-                                                                          .none),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
-                                                  disabledBorder:
-                                                      OutlineInputBorder(
-                                                          borderSide:
-                                                              const BorderSide(
-                                                                  style:
-                                                                      BorderStyle
-                                                                          .none),
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20)),
-                                                  isDense: false,
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: Container(
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: Default_Theme.primaryColor2.withOpacity(0.04),
+                                          borderRadius: BorderRadius.circular(24),
+                                          border: Border.all(
+                                            color: Default_Theme.primaryColor1.withOpacity(0.08),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: availSourceEngines.asMap().entries.map((entry) {
+                                            final isSelected = _sourceEngine == entry.value;
+                                            final isFirst = entry.key == 0;
+                                            final isLast = entry.key == availSourceEngines.length - 1;
+                                            
+                                            return InkWell(
+                                              onTap: () {
+                                                setState(() {
+                                                  _sourceEngine = entry.value;
+                                                });
+                                                context
+                                                    .read<FetchSearchResultsCubit>()
+                                                    .checkAndRefreshSearch(
+                                                      query: _textEditingController.text.toString(),
+                                                      sE: entry.value,
+                                                      rT: resultType.value,
+                                                    );
+                                              },
+                                              borderRadius: BorderRadius.horizontal(
+                                                left: isFirst ? const Radius.circular(24) : Radius.zero,
+                                                right: isLast ? const Radius.circular(24) : Radius.zero,
+                                              ),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  color: isSelected
+                                                      ? Default_Theme.accentColor2
+                                                      : Colors.transparent,
+                                                  borderRadius: BorderRadius.horizontal(
+                                                    left: isFirst ? const Radius.circular(22) : Radius.zero,
+                                                    right: isLast ? const Radius.circular(22) : Radius.zero,
+                                                  ),
                                                 ),
-                                                value: resultType.value.index,
-                                                items: ResultTypes.values
-                                                    .map(
-                                                        (e) => DropdownMenuItem(
-                                                              value: e.index,
-                                                              child: SizedBox(
-                                                                height: 34,
-                                                                child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets.only(
-                                                                    left: 8,
-                                                                    top: 4,
-                                                                    bottom: 4,
-                                                                  ),
-                                                                  child: Text(
-                                                                    e.val,
-                                                                    style: Default_Theme
-                                                                        .secondoryTextStyleMedium
-                                                                        .merge(
-                                                                            const TextStyle(
-                                                                      color: Default_Theme
-                                                                          .primaryColor1,
-                                                                      fontSize:
-                                                                          13.8,
-                                                                    )),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ))
-                                                    .toList(),
-                                                onChanged: (value) {
-                                                  resultType.value = ResultTypes
-                                                      .values[value!];
-                                                  context
-                                                      .read<
-                                                          FetchSearchResultsCubit>()
-                                                      .checkAndRefreshSearch(
-                                                        query:
-                                                            _textEditingController
-                                                                .text
-                                                                .toString(),
-                                                        sE: _sourceEngine,
-                                                        rT: resultType.value,
-                                                      );
-                                                },
-                                              );
-                                            }),
+                                                child: Text(
+                                                  entry.value.value,
+                                                  style: Default_Theme.secondoryTextStyleMedium.merge(
+                                                    TextStyle(
+                                                      color: isSelected
+                                                          ? Default_Theme.primaryColor2
+                                                          : Default_Theme.primaryColor1.withOpacity(0.6),
+                                                      fontSize: 13.5,
+                                                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
                                       ),
                                     ),
-                                    for (var sourceEngine in availSourceEngines)
-                                      sourceEngineRadioButton(sourceEngine)
+                                    for (var type in ResultTypes.values)
+                                      resultTypeChip(type)
                                   ])
-                            : const SizedBox();
-                      }),
+                              : const SizedBox();
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -392,7 +335,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                         );
                                       }
                                       return Padding(
-                                        padding: const EdgeInsets.only(left: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                         child: SongCardWidget(
                                           song: state.mediaItems[index],
                                           onTap: () {

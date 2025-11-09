@@ -24,6 +24,7 @@ import 'package:Bloomee/utils/load_Image.dart';
 import 'package:Bloomee/utils/pallete_generator.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import '../../blocs/mediaPlayer/bloomee_player_cubit.dart';
 import '../../blocs/mini_player/mini_player_bloc.dart';
@@ -927,57 +928,83 @@ class PlayerCtrlWidgets extends StatelessWidget {
                       ),
                     ),
                   ),
-                Tooltip(
-                  message: "Open Original Link",
-                  child: IconButton(
-                    padding: const EdgeInsets.all(5),
-                    constraints: const BoxConstraints(),
-                    style: const ButtonStyle(
-                      tapTargetSize:
-                          MaterialTapTargetSize.shrinkWrap, // the '2023' part
-                    ),
-                    icon: StreamBuilder<MediaItem?>(
-                        stream: bloomeePlayerCubit.bloomeePlayer.mediaItem,
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData &&
-                              snapshot.data?.extras?['perma_url'] != null) {
-                            return snapshot.data?.extras?['source'] == 'youtube'
-                                ? const Icon(
-                                    MingCute.youtube_fill,
-                                    color: Default_Theme.primaryColor1,
-                                    size: 30,
-                                  )
-                                : Text("JioSaavn",
-                                    style: const TextStyle(
-                                            color: Default_Theme.primaryColor1,
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold)
-                                        .merge(
-                                            Default_Theme.secondoryTextStyle));
-                          }
+                StreamBuilder<MediaItem?>(
+                  stream: bloomeePlayerCubit.bloomeePlayer.mediaItem,
+                  builder: (context, snapshot) {
+                    final mediaItem = snapshot.data;
+                    final permaUrl = mediaItem?.extras?['perma_url'] as String?;
+                    final isYoutube = mediaItem?.extras?['source'] == 'youtube';
 
-                          return const Icon(
-                            MingCute.external_link_line,
-                            color: Default_Theme.primaryColor1,
-                            size: 30,
-                          );
-                        }),
-                    onPressed: () async {
-                      final url = context
-                          .read<BloomeePlayerCubit>()
-                          .bloomeePlayer
-                          .currentMedia
-                          .extras?['perma_url'];
-                      if (url != null && await canLaunchUrlString(url)) {
-                        await launchUrlString(url);
+                    Widget iconWidget;
+                    if (permaUrl != null) {
+                      if (isYoutube) {
+                        iconWidget = const Icon(
+                          MingCute.share_forward_fill,
+                          color: Default_Theme.primaryColor1,
+                          size: 26,
+                        );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text("Unable to open the link")),
+                        iconWidget = Text(
+                          "JioSaavn",
+                          style: const TextStyle(
+                                  color: Default_Theme.primaryColor1,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold)
+                              .merge(Default_Theme.secondoryTextStyle),
                         );
                       }
-                    },
-                  ),
+                    } else {
+                      iconWidget = const Icon(
+                        MingCute.external_link_line,
+                        color: Default_Theme.primaryColor1,
+                        size: 30,
+                      );
+                    }
+
+                    return Tooltip(
+                      message: isYoutube ? "Share" : "Open Original Link",
+                      child: IconButton(
+                        padding: const EdgeInsets.all(5),
+                        constraints: const BoxConstraints(),
+                        style: const ButtonStyle(
+                          tapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap, // the '2023' part
+                        ),
+                        icon: iconWidget,
+                        onPressed: () async {
+                          final player =
+                              context.read<BloomeePlayerCubit>().bloomeePlayer;
+                          final currentMedia = player.currentMedia;
+                          final extras = currentMedia.extras;
+                          final url = extras?['perma_url'] as String?;
+                          final source = extras?['source'];
+
+                          if (source == 'youtube') {
+                            if (url != null && url.isNotEmpty) {
+                              await Share.share(
+                                url,
+                                subject: currentMedia.title,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Unable to share the link")),
+                              );
+                            }
+                          } else {
+                            if (url != null && await canLaunchUrlString(url)) {
+                              await launchUrlString(url);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Unable to open the link")),
+                              );
+                            }
+                          }
+                        },
+                      ),
+                    );
+                  },
                 )
               ],
             ),

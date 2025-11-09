@@ -14,7 +14,7 @@ enum LibItemTypes {
   album,
 }
 
-class LibItemCard extends StatelessWidget {
+class LibItemCard extends StatefulWidget {
   final String title;
   final String coverArt;
   final String subtitle;
@@ -34,6 +34,38 @@ class LibItemCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<LibItemCard> createState() => _LibItemCardState();
+}
+
+class _LibItemCardState extends State<LibItemCard> with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _rotationAnimation = Tween<double>(begin: -0.05, end: 0.05).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8),
@@ -42,9 +74,9 @@ class LibItemCard extends StatelessWidget {
         hoverColor: Colors.white.withOpacity(0.05),
         highlightColor: Default_Theme.primaryColor2.withOpacity(0.1),
         borderRadius: BorderRadius.circular(10),
-        onTap: onTap ?? () {},
-        onSecondaryTap: onSecondaryTap ?? () {},
-        onLongPress: onLongPress ?? () {},
+        onTap: widget.onTap ?? () {},
+        onSecondaryTap: widget.onSecondaryTap ?? () {},
+        onLongPress: widget.onLongPress ?? () {},
         child: SizedBox(
           height: 80,
           child: Row(
@@ -52,14 +84,14 @@ class LibItemCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              type == LibItemTypes.userPlaylist
+              widget.type == LibItemTypes.userPlaylist
                   ? StreamBuilder<String>(
                       stream: context
                           .watch<BloomeePlayerCubit>()
                           .bloomeePlayer
                           .queueTitle,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data == title) {
+                        if (snapshot.hasData && snapshot.data == widget.title) {
                           return Padding(
                             padding: const EdgeInsets.only(left: 8),
                             child: Icon(
@@ -76,25 +108,62 @@ class LibItemCard extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 10, right: 10),
                 child: SizedBox.square(
                   dimension: 70,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: switch (type) {
-                      LibItemTypes.userPlaylist => LoadImageCached(
-                          imageUrl: formatImgURL(
-                              coverArt.toString(), ImageQuality.medium)),
-                      LibItemTypes.onlPlaylist => LoadImageCached(
-                          imageUrl: formatImgURL(
-                              coverArt.toString(), ImageQuality.medium)),
-                      LibItemTypes.artist => ClipOval(
-                          child: LoadImageCached(
-                              imageUrl: formatImgURL(
-                                  coverArt.toString(), ImageQuality.medium)),
+                  child: widget.title == "Liked"
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color(0xFFFF0844),
+                                Color(0xFFFF6B6B),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFFF0844).withOpacity(0.3),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                          child: AnimatedBuilder(
+                            animation: _animationController,
+                            builder: (context, child) {
+                              return Transform.scale(
+                                scale: _scaleAnimation.value,
+                                child: Transform.rotate(
+                                  angle: _rotationAnimation.value,
+                                  child: const Icon(
+                                    AntDesign.heart_fill,
+                                    color: Colors.white,
+                                    size: 35,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: switch (widget.type) {
+                            LibItemTypes.userPlaylist => LoadImageCached(
+                                imageUrl: formatImgURL(
+                                    widget.coverArt.toString(), ImageQuality.medium)),
+                            LibItemTypes.onlPlaylist => LoadImageCached(
+                                imageUrl: formatImgURL(
+                                    widget.coverArt.toString(), ImageQuality.medium)),
+                            LibItemTypes.artist => ClipOval(
+                                child: LoadImageCached(
+                                    imageUrl: formatImgURL(
+                                        widget.coverArt.toString(), ImageQuality.medium)),
+                              ),
+                            LibItemTypes.album => LoadImageCached(
+                                imageUrl: formatImgURL(
+                                    widget.coverArt.toString(), ImageQuality.medium)),
+                          },
                         ),
-                      LibItemTypes.album => LoadImageCached(
-                          imageUrl: formatImgURL(
-                              coverArt.toString(), ImageQuality.medium)),
-                    },
-                  ),
                 ),
               ),
               Expanded(
@@ -104,7 +173,7 @@ class LibItemCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
+                      widget.title,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 2,
                       style: Default_Theme.secondoryTextStyle.merge(
@@ -114,7 +183,7 @@ class LibItemCard extends StatelessWidget {
                               color: Default_Theme.primaryColor1)),
                     ),
                     Text(
-                      subtitle,
+                      widget.subtitle,
                       maxLines: 1,
                       style: Default_Theme.secondoryTextStyle.merge(
                           const TextStyle(

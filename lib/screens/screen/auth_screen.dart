@@ -140,7 +140,7 @@ class _AuthScreenState extends State<AuthScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      'Welcome to Bloomee',
+                      'Welcome to UpTune',
                       style: Default_Theme.primaryTextStyle.merge(
                         const TextStyle(
                           color: Default_Theme.primaryColor1,
