@@ -96,12 +96,20 @@ jobs:
               working-directory: ios
               run: pod install
 
-            - name: Import signing certificates and provisioning profiles
-              uses: apple-actions/import-codesign-certs@v2
+            - name: Import signing certificates
+              uses: apple-actions/import-codesign-certs@v3
               with:
                   p12-file-base64: ${{ secrets.IOS_CERT_P12 }}
                   p12-password: ${{ secrets.IOS_CERT_PASSWORD }}
-                  profile-base64: ${{ secrets.IOS_PROFILE }}
+
+            - name: Install provisioning profile
+              uses: apple-actions/download-provisioning-profiles@v2
+              with:
+                  bundle-id: ${{ secrets.IOS_PROFILE_BUNDLE_ID }}
+                  profile-type: IOS_APP_STORE
+                  issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+                  api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
+                  api-private-key: ${{ secrets.APPSTORE_KEY_BASE64 }}
 
             - name: Build IPA
               run: flutter build ipa --release --build-number ${{github.run_number}} --export-method app-store
