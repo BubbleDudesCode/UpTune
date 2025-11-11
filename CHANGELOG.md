@@ -1,3 +1,13 @@
+## [1.0.2] - 2025-11-08
+
+### Changed
+- **Search Bar Design**: Updated the design for a cleaner and more modern look.
+- **Search Filter Design**: Improved layout and visual consistency of search filters.
+- **Liked Playlist Icon**: Replaced the old icon with a new, more recognizable one.
+
+------------------------------------------------------------
+Version 1.0.2 — Released on 2025-11-11
+------------------------------------------------------------
 
 
 ## [1.0.1] - 2025-11-08

@@ -395,16 +395,13 @@ class BloomeeMusicPlayer extends BaseAudioHandler
     Duration? initialPosition,
   }) async {
     try {
-      await pause();
-      await seek(initialPosition ?? Duration.zero);
-
-      await audioPlayer.setAudioSource(audioSource);
-      // Protect against hanging load calls (observed on Android when DNS fails).
       try {
-        // Wait up to 12 seconds for load, otherwise treat as network error.
-        await audioPlayer.load().timeout(const Duration(seconds: 12));
+        await audioPlayer
+            .setAudioSource(audioSource)
+            .timeout(const Duration(seconds: 12));
       } on TimeoutException catch (e) {
-        log('audioPlayer.load() timed out: $e', name: 'bloomeePlayer');
+        log('audioPlayer.setAudioSource() timed out: $e',
+            name: 'bloomeePlayer');
         final currentItem = _queueManager.currentMediaItem;
         _errorHandler.handleError(PlayerErrorType.networkError,
             'Network timeout while loading track', currentItem, e);
@@ -412,6 +409,10 @@ class BloomeeMusicPlayer extends BaseAudioHandler
           await audioPlayer.stop();
         } catch (_) {}
         rethrow;
+      }
+
+      if (initialPosition != null && initialPosition > Duration.zero) {
+        await audioPlayer.seek(initialPosition);
       }
 
       if (!audioPlayer.playing) {
