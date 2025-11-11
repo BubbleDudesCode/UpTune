@@ -37,7 +37,7 @@ UpTune is a modern music experience for desktop and mobile users. It combines be
 ## Screenshots
 
 <p align="center">
-  <img src="https://i.ibb.co/8LyWZY7g/LOGIN-TO-SAVE-YOUR-SONGS.png" alt="Login to save your songs screen" width="420" />
+  <img width="2300" height="1000" alt="LOGIN TO SAVE YOUR SONGS" src="https://github.com/user-attachments/assets/03c1a3c0-5608-4576-b31f-b27216afd4f4" />
 </p>
 
 ## Getting Started
@@ -66,4 +66,3 @@ You are free to use, modify, and distribute this software in accordance with the
 <p align="center">
   Built with ❤️ by the UpTune community.
 </p>
-
