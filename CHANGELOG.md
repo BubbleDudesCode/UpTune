@@ -1,4 +1,4 @@
-## [1.0.2] - 2025-11-08
+## [1.0.2] - 2025-11-11
 
 ### Changed
 - **Search Bar Design**: Updated the design for a cleaner and more modern look.
